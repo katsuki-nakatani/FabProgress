@@ -1,0 +1,11 @@
+<resources>
+    <declare-styleable name="Fab">
+        <attr name="fabDrawable" format="reference" />
+        <attr name="fabColor" format="color" />
+        <attr name="progressColor" format="color" />
+        <attr name="progressBackgroundColor" format="color" />
+        <attr name="fabDepth" format="integer" />
+        <attr name="fabShadowRadius" format="float" />
+    </declare-styleable>
+
+</resources>

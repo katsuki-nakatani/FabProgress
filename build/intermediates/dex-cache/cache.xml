@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-d23436fc6f01750ea7306030caa284445dda6c6d.jar" />
+    </item>
+    <item
+        jar="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.3/support-annotations-21.0.3.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
+        <dex dex="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-fa100554894d48afbb0ad0851f92cc333d0a6051.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/exploded-aar/FabProgress/fabprogress/unspecified/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="ead35b03cfb2aa1f1f64210de2142058955dbe6c">
+        <dex dex="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-dc65ab90c7e0c381c4a96ec0f39041d6f49ebbd7.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-8f49c022f4587140f3ad4cba221c8c9cf05f4b09.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/libs/internal_impl-21.0.3.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
+        <dex dex="/Users/katsuki-nakatani/git/mirukerapps/Android/Library/FabProgress/sample/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-6e316f66e3d5bd1f2d1c4d9d91c1c07459ee61e3.jar" />
+    </item>
+
+</items>
