@@ -3,6 +3,8 @@ FabProgress
 
 Floating Action Button with Progress Ring
 
+![LeftOffset](http://mirukerapps.com/wp/wp-content/uploads/2014/12/GIF_20141228_204743.gif)
+
 Usage
 ---------------
 
