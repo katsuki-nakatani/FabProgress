@@ -46,7 +46,6 @@ Usage
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<resources>
     <declare-styleable name="Fab">
         <attr name="fabDrawable" format="reference" />
         <attr name="fabColor" format="color" />
