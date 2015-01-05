@@ -1,6 +1,5 @@
 package com.miruker.fabprogress;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -19,8 +18,6 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 
 
 public class Fab extends View {
@@ -28,7 +25,10 @@ public class Fab extends View {
     private static final int PROGRESS_DEFAULT_COLOR = Color.parseColor("#009688");
     private static final float SHADOW_RADIUS = 10f;
     private static final int STROKE_SIZE = 12;
-    private static final int PROGRESS_START_VALUE = 320;
+    private static final int PROGRESS_MAX_VALUE = 280;
+    private static final float PROGRESS_ACCELERATE_MAX = 4.0f;
+    private static final float PROGRESS_ACCELERATE_MIN = 1.0f;
+    private static final float PROGRESS_ACCELERATE_ADDITION = 0.2f;
     private static final int mShadowColor = Color.argb(100, 0, 0, 0);
     private static final float BACKGROUND_CANVAS_SCALE = 2.3f;
     private static final float FAB_CANVAS_SCALE = 2.6f;
@@ -56,7 +56,6 @@ public class Fab extends View {
     float mShadowRadius = SHADOW_RADIUS;
     int mDistance = 2;
     float pressedAlpha = FAB_PRESSED_ALPHA;
-    boolean mHidden = false;
     int mFabColor = Color.WHITE;
     private float mDepth = DEPTH_2;
     Drawable myDrawable;
@@ -64,17 +63,17 @@ public class Fab extends View {
     RectF mProgressRectF;
     Paint mProgressArcPaint;
     private boolean isProgress = false;
-    private int mProgressMaxValue = PROGRESS_START_VALUE;
-    private int mProgressValue = PROGRESS_START_VALUE;
+    private int mProgressValue = 0;
     private int mProgressStartValue = 0;
     private boolean mReverse = false;
     private int mProgressColor;
     private int mBackgroundCanvasColor = Color.WHITE;
     private float mBackgroundCanvasSize = FAB_CANVAS_SCALE;
+    private float mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+    private int mProgressSweepValue = 0;
 
 
     /**
-     *
      * @param context
      * @param attributeSet
      */
@@ -89,6 +88,7 @@ public class Fab extends View {
 
     /**
      * savedInstance
+     *
      * @return
      */
     @Override
@@ -98,15 +98,18 @@ public class Fab extends View {
         saved.mBackgroundCanvasColor = mBackgroundCanvasColor;
         saved.mBackgroundCanvasSize = mBackgroundCanvasSize;
         saved.mProgressColor = mProgressColor;
-        saved.mProgressMaxValue = mProgressMaxValue;
         saved.mProgressValue = mProgressValue;
         saved.mReverse = mReverse;
         saved.isProgress = isProgress;
+        saved.mProgressAccelerate = mProgressAccelerate;
+        saved.mProgressSweepValue = mProgressSweepValue;
+
         return saved;
     }
 
     /**
      * restoreInstance
+     *
      * @param state
      */
     @Override
@@ -121,14 +124,14 @@ public class Fab extends View {
         mBackgroundCanvasColor = saved.mBackgroundCanvasColor;
         mBackgroundCanvasSize = saved.mBackgroundCanvasSize;
         mProgressColor = saved.mProgressColor;
-        mProgressMaxValue = saved.mProgressMaxValue;
         mProgressValue = saved.mProgressValue;
+        mProgressAccelerate = saved.mProgressAccelerate;
         mReverse = saved.mReverse;
         isProgress = saved.isProgress;
+        mProgressSweepValue = saved.mProgressSweepValue;
     }
 
     /**
-     *
      * @param context
      * @param attributeSet
      * @param defStyle
@@ -143,7 +146,6 @@ public class Fab extends View {
     }
 
     /**
-     *
      * @param context
      */
     public Fab(Context context) {
@@ -155,7 +157,6 @@ public class Fab extends View {
 
 
     /**
-     *
      * @param attrs
      * @param defStyle
      */
@@ -192,6 +193,7 @@ public class Fab extends View {
 
     /**
      * show progress ring
+     *
      * @param flg
      */
     public void showProgress(boolean flg) {
@@ -201,14 +203,13 @@ public class Fab extends View {
             mBackgroundCanvasSize = FAB_CANVAS_SCALE;
             mProgressStartValue = 0;
             mReverse = false;
-            mProgressValue = PROGRESS_START_VALUE;
-            mProgressMaxValue = PROGRESS_START_VALUE;
+            mProgressValue = 0;
+            mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
         }
         invalidate();
     }
 
     /**
-     *
      * @return
      */
     public boolean isProgress() {
@@ -217,6 +218,7 @@ public class Fab extends View {
 
     /**
      * fab color setter
+     *
      * @param color
      */
     public void setFabColor(int color) {
@@ -226,6 +228,7 @@ public class Fab extends View {
 
     /**
      * fab drawable getter
+     *
      * @param fabDrawable
      */
     public void setFabDrawable(Drawable fabDrawable) {
@@ -236,6 +239,7 @@ public class Fab extends View {
 
     /**
      * fab shadow radius setter
+     *
      * @param radius
      */
     public void setFabShadowRadius(float radius) {
@@ -245,6 +249,7 @@ public class Fab extends View {
 
     /**
      * depth setter
+     *
      * @param depth
      */
     public void setFabDepth(int depth) {
@@ -254,6 +259,7 @@ public class Fab extends View {
 
     /**
      * pressed alpha setter
+     *
      * @param alpha
      */
     public void setPressedAlpha(float alpha) {
@@ -263,6 +269,7 @@ public class Fab extends View {
 
     /**
      * animatino mode setter
+     *
      * @param mode
      */
     public void setAnimationMode(int mode) {
@@ -317,22 +324,39 @@ public class Fab extends View {
             //invisible shadow layer
             mButtonPaint.clearShadowLayer();
             if (mBackgroundCanvasSize == BACKGROUND_CANVAS_SCALE) {
-                if (mReverse)
-                    mProgressStartValue += 10;
-                else
-                    mProgressStartValue += 5;
+                mProgressStartValue += 3;
 
                 if (mProgressStartValue >= 360) {
-                    mProgressStartValue = 1;
+                    mProgressStartValue -= 360;
                 }
-                if (!mReverse)
-                    mProgressValue -= 5;
-                else
-                    mProgressValue += 5;
-                if (mProgressValue == 0 || mProgressValue == mProgressMaxValue) {
+                if (mProgressSweepValue >= 360) {
+                    mProgressSweepValue -= 360;
+                }
+                if (mProgressAccelerate <= PROGRESS_ACCELERATE_MIN) {
+                    mProgressAccelerate = PROGRESS_ACCELERATE_MIN;
+                }
+                if (mProgressAccelerate >= PROGRESS_ACCELERATE_MAX) {
+                    mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+                }
+
+                mProgressAccelerate -= PROGRESS_ACCELERATE_ADDITION;
+
+                mProgressSweepValue += 5 * mProgressAccelerate;
+
+                if (mReverse && mProgressSweepValue >= 0) {
                     mReverse = !mReverse;
+                    mProgressSweepValue = 0;
+                    mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+                } else if (mProgressSweepValue > PROGRESS_MAX_VALUE) {
+                    mReverse = !mReverse;
+                    mProgressStartValue += mProgressSweepValue;
+                    mProgressSweepValue = -PROGRESS_MAX_VALUE;
+                    mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
                 }
+
+
             }
+
 
             mBackgroundCanvasSize -= 0.05f;
             if (mBackgroundCanvasSize < BACKGROUND_CANVAS_SCALE)
@@ -342,7 +366,7 @@ public class Fab extends View {
             canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / mBackgroundCanvasSize), mProgressBackPaint);
             //ProgressArc
             if (mBackgroundCanvasSize == BACKGROUND_CANVAS_SCALE) {
-                canvas.drawArc(mProgressRectF, mProgressStartValue, mProgressMaxValue - mProgressValue, false, mProgressArcPaint);
+                canvas.drawArc(mProgressRectF, mProgressStartValue, mProgressSweepValue, false, mProgressArcPaint);
             }
             isInvalidate = true;
         } else {
@@ -363,12 +387,12 @@ public class Fab extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_UP ||
-                event.getAction() == MotionEvent.ACTION_CANCEL){
+        if (event.getAction() == MotionEvent.ACTION_UP ||
+                event.getAction() == MotionEvent.ACTION_CANCEL) {
             setAlpha(1.0f);
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if(isEnabled()) {
+            if (isEnabled()) {
                 setAlpha(pressedAlpha);
             }
         }
@@ -381,9 +405,9 @@ public class Fab extends View {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if(isProgress){
+        if (isProgress) {
             setAlpha(1.0f);
-        }else {
+        } else {
             setAlpha(enabled ? 1.0f : FAB_DISABLED_ALPHA);
         }
     }
@@ -400,76 +424,17 @@ public class Fab extends View {
         return px;
     }
 
-    public boolean isHidden() {
-        return this.mHidden;
-    }
-
-    public void hideFab() {
-        if (mHidden == false) {
-            mCurrentX = getY();
-            mCurrentY = getX();
-
-            ObjectAnimator mHideAnimation = null;
-            switch (mMode) {
-                case MODE_FROM_BOTTOM:
-                    mHideAnimation = ObjectAnimator.ofFloat(this, "Y", mScreenHeight);
-                    break;
-                case MODE_FROM_TOP:
-                    mHideAnimation = ObjectAnimator.ofFloat(this, "Y", -mScreenHeight);
-                    break;
-                case MODE_FROM_LEFT:
-                    mHideAnimation = ObjectAnimator.ofFloat(this, "X", -mScreenWidth);
-                    break;
-                case MODE_FROM_RIGHT:
-                    mHideAnimation = ObjectAnimator.ofFloat(this, "X", mScreenWidth);
-                    break;
-                default:
-                    mHideAnimation = ObjectAnimator.ofFloat(this, "Y", mScreenHeight);
-                    break;
-            }
-            mHideAnimation.setInterpolator(new AccelerateInterpolator());
-            mHideAnimation.start();
-            mHidden = true;
-        }
-    }
-
-    public void showFab() {
-        if (mHidden == true) {
-            ObjectAnimator mShowAnimation = null;
-
-            switch (mMode) {
-                case MODE_FROM_BOTTOM:
-                    mShowAnimation = ObjectAnimator.ofFloat(this, "Y", mCurrentX);
-                    break;
-                case MODE_FROM_TOP:
-                    mShowAnimation = ObjectAnimator.ofFloat(this, "Y", -mCurrentX);
-                    break;
-                case MODE_FROM_LEFT:
-                    mShowAnimation = ObjectAnimator.ofFloat(this, "X", mCurrentY);
-                    break;
-                case MODE_FROM_RIGHT:
-                    mShowAnimation = ObjectAnimator.ofFloat(this, "X", mCurrentY);
-                    break;
-                default:
-                    mShowAnimation = ObjectAnimator.ofFloat(this, "Y", mCurrentX);
-                    break;
-            }
-
-            mShowAnimation.setInterpolator(new DecelerateInterpolator());
-            mShowAnimation.start();
-            mHidden = false;
-        }
-    }
 
     public static class SavedState extends BaseSavedState {
         private boolean isProgress;
-        private int mProgressMaxValue;
         private int mProgressValue;
         private int mProgressStartValue;
         private boolean mReverse;
         private int mProgressColor;
         private int mBackgroundCanvasColor;
         private float mBackgroundCanvasSize;
+        private float mProgressAccelerate;
+        private int mProgressSweepValue;
 
         public SavedState(Parcel in) {
             /*
@@ -478,13 +443,14 @@ public class Fab extends View {
             super(in);
 
             isProgress = in.readInt() == 0 ? false : true;
-            mProgressMaxValue = in.readInt();
             mProgressValue = in.readInt();
             mProgressStartValue = in.readInt();
             mReverse = in.readInt() == 0 ? false : true;
             mProgressColor = in.readInt();
             mBackgroundCanvasColor = in.readInt();
             mBackgroundCanvasSize = in.readFloat();
+            mProgressAccelerate = in.readFloat();
+            mProgressSweepValue = in.readInt();
         }
 
         public SavedState(Parcelable superState) {
@@ -496,13 +462,14 @@ public class Fab extends View {
             super.writeToParcel(out, flags);
 
             out.writeInt(isProgress ? 1 : 0);
-            out.writeInt(mProgressMaxValue);
             out.writeInt(mProgressValue);
             out.writeInt(mProgressStartValue);
             out.writeInt(mReverse ? 1 : 0);
             out.writeInt(mProgressColor);
             out.writeInt(mBackgroundCanvasColor);
             out.writeFloat(mBackgroundCanvasSize);
+            out.writeFloat(mProgressAccelerate);
+            out.writeInt(mProgressSweepValue);
         }
 
         public static final Creator CREATOR =

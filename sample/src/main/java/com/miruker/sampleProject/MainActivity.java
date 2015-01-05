@@ -16,12 +16,13 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btnShowProgress).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((Fab)findViewById(R.id.fabAction)).showProgress(!((Fab)findViewById(R.id.fabAction)).isProgress());
             }
         });
+
     }
 
 

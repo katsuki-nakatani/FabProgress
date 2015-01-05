@@ -29,6 +29,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:text="Change Progress"
-        android:id="@+id/button"/>
+        android:id="@+id/btnShowProgress"/>
 
 </FrameLayout>

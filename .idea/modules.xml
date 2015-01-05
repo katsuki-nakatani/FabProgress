@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/FabProgress.iml" filepath="$PROJECT_DIR$/FabProgress.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fabprogress/fabprogress.iml" filepath="$PROJECT_DIR$/fabprogress/fabprogress.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
+    </modules>
+  </component>
+</project>
+
