@@ -417,7 +417,7 @@ public class Fab extends View {
                             mFinishFlg = FINISH_ENDED;
                             mFinishAnimator = null;
                             if(mListener != null){
-                                mListener.finish();
+                                mListener.finishAnimation();
                             }
                         }
 

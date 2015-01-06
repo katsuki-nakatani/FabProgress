@@ -38,7 +38,7 @@ public class MainActivity extends ActionBarActivity {
 
         ((Fab) findViewById(R.id.fabAction)).addListener(new FabListener() {
             @Override
-            public void finish() {
+            public void finishAnimation() {
                 Toast.makeText(getApplicationContext(),"finished!",Toast.LENGTH_SHORT).show();
             }
         });
