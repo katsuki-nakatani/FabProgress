@@ -1,12 +1,15 @@
 package com.miruker.fabprogress;
 
+import android.animation.Animator;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,10 +17,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 
 public class Fab extends View {
@@ -34,32 +35,28 @@ public class Fab extends View {
     private static final float FAB_CANVAS_SCALE = 2.6f;
     private static final float FAB_PRESSED_ALPHA = 0.6f;
     private static final float FAB_DISABLED_ALPHA = 0.6f;
-    public static final int MODE_FROM_BOTTOM = 0;
-    public static final int MODE_FROM_TOP = 1;
-    public static final int MODE_FROM_LEFT = 2;
-    public static final int MODE_FROM_RIGHT = 3;
     private static final float DEPTH_1 = 1.0f;
     private static final float DEPTH_2 = 3.0f;
     private static final float DEPTH_3 = 10.0f;
     private static final float DEPTH_4 = 14.0f;
     private static final float DEPTH_5 = 19.0f;
+    private static final int FINISH_OFF = 0;
+    private static final int FINISH_ON = 1;
+    private static final int FINISH_ENDED = 2;
 
     Context _context;
     Paint mButtonPaint;
     Paint mDrawablePaint;
     Paint mProgressBackPaint;
-    Bitmap mBitmap;
-    int mScreenHeight;
-    int mScreenWidth;
-    float mCurrentX;
-    float mCurrentY;
+    Bitmap mIconBitmap;
+    Bitmap mFinishIconBitmap;
     float mShadowRadius = SHADOW_RADIUS;
     int mDistance = 2;
     float pressedAlpha = FAB_PRESSED_ALPHA;
     int mFabColor = Color.WHITE;
     private float mDepth = DEPTH_2;
-    Drawable myDrawable;
-    private int mMode = 0;
+    Drawable mIconDrawable;
+    Drawable mFinishIconDrawable;
     RectF mProgressRectF;
     Paint mProgressArcPaint;
     private boolean isProgress = false;
@@ -71,6 +68,9 @@ public class Fab extends View {
     private float mBackgroundCanvasSize = FAB_CANVAS_SCALE;
     private float mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
     private int mProgressSweepValue = 0;
+    private int mFinishFlg = FINISH_OFF;
+    private ValueAnimator mFinishAnimator;
+    private FabListener mListener;
 
 
     /**
@@ -103,7 +103,7 @@ public class Fab extends View {
         saved.isProgress = isProgress;
         saved.mProgressAccelerate = mProgressAccelerate;
         saved.mProgressSweepValue = mProgressSweepValue;
-
+        saved.mFinishFlg = mFinishFlg;
         return saved;
     }
 
@@ -129,6 +129,10 @@ public class Fab extends View {
         mReverse = saved.mReverse;
         isProgress = saved.isProgress;
         mProgressSweepValue = saved.mProgressSweepValue;
+        mFinishFlg = saved.mFinishFlg;
+        if(mFinishFlg == FINISH_ENDED && mButtonPaint != null){
+            mButtonPaint.setColor(mProgressColor);
+        }
     }
 
     /**
@@ -162,8 +166,11 @@ public class Fab extends View {
      */
     private void parseAttrs(AttributeSet attrs, int defStyle) {
         TypedArray a = _context.obtainStyledAttributes(attrs, com.miruker.fabprogress.R.styleable.Fab, defStyle, 0);
-        myDrawable = a.getDrawable(R.styleable.Fab_fabDrawable);
-        mBitmap = ((BitmapDrawable) myDrawable).getBitmap();
+        mIconDrawable = a.getDrawable(R.styleable.Fab_fabDrawable);
+        mFinishIconDrawable = a.getDrawable(R.styleable.Fab_fabFinishDrawable);
+        mIconBitmap = ((BitmapDrawable) mIconDrawable).getBitmap();
+        if(mFinishIconDrawable != null)
+            mFinishIconBitmap = ((BitmapDrawable) mFinishIconDrawable).getBitmap();
         mFabColor = a.getColor(R.styleable.Fab_fabColor, Color.WHITE);
         mProgressColor = a.getColor(R.styleable.Fab_progressColor, PROGRESS_DEFAULT_COLOR);
         mBackgroundCanvasColor = a.getColor(R.styleable.Fab_progressBackgroundColor, Color.WHITE);
@@ -193,19 +200,34 @@ public class Fab extends View {
 
     /**
      * show progress ring
-     *
-     * @param flg
      */
-    public void showProgress(boolean flg) {
-        isProgress = flg;
-        if (isProgress) {
-            setAlpha(1.0f);
-            mBackgroundCanvasSize = FAB_CANVAS_SCALE;
-            mProgressStartValue = 0;
-            mReverse = false;
-            mProgressValue = 0;
-            mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+    public void showProgress() {
+        isProgress = true;
+        mFinishFlg = FINISH_OFF;
+        mFinishAnimator = null;
+        mButtonPaint.setColor(mFabColor);
+        setAlpha(1.0f);
+        mBackgroundCanvasSize = FAB_CANVAS_SCALE;
+        mProgressStartValue = 0;
+        mReverse = false;
+        mProgressValue = 0;
+        mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+        invalidate();
+    }
+
+    /**
+     * hide progress ring
+     */
+    public void hideProgress() {
+        if(isProgress == true && mFinishFlg == FINISH_OFF) {
+            isProgress = false;
+            invalidate();
         }
+    }
+
+    public void finishProgress(){
+    //    isProgress = false;
+        mFinishFlg = FINISH_ON;
         invalidate();
     }
 
@@ -214,6 +236,14 @@ public class Fab extends View {
      */
     public boolean isProgress() {
         return isProgress;
+    }
+
+    public void addListener(FabListener listner){
+        mListener = listner;
+    }
+
+    public void removeListener(){
+        mListener = null;
     }
 
     /**
@@ -226,14 +256,19 @@ public class Fab extends View {
         invalidate();
     }
 
+    public void setFinishAnimationColor(int color){
+        this.mButtonPaint.setColor(color);
+        invalidate();
+    }
+
     /**
      * fab drawable getter
      *
      * @param fabDrawable
      */
     public void setFabDrawable(Drawable fabDrawable) {
-        myDrawable = fabDrawable;
-        mBitmap = ((BitmapDrawable) myDrawable).getBitmap();
+        mIconDrawable = fabDrawable;
+        mIconBitmap = ((BitmapDrawable) mIconDrawable).getBitmap();
         invalidate();
     }
 
@@ -267,16 +302,6 @@ public class Fab extends View {
         invalidate();
     }
 
-    /**
-     * animatino mode setter
-     *
-     * @param mode
-     */
-    public void setAnimationMode(int mode) {
-        this.mMode = mode;
-    }
-
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         mProgressRectF = new RectF(0 + dpToPx(10), 0 + dpToPx(10), w - dpToPx(10), h - dpToPx(10));
@@ -285,25 +310,19 @@ public class Fab extends View {
     public void init() {
         setWillNotDraw(false);
         this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        //Fab draw Paint
         mButtonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mButtonPaint.setColor(mFabColor);
         mButtonPaint.setStyle(Paint.Style.FILL);
         mButtonPaint.setShadowLayer(dpToPx(mShadowRadius), 0.0f, mDepth, mShadowColor);
+
+        //Icon draw Paint
         mDrawablePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         mProgressBackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mProgressBackPaint.setColor(mBackgroundCanvasColor);
         mProgressBackPaint.setStyle(Paint.Style.FILL);
         mProgressBackPaint.setShadowLayer(dpToPx(mShadowRadius), 0.0f, mDepth, mShadowColor);
-
-        invalidate();
-
-        WindowManager mWindowManager = (WindowManager) _context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = mWindowManager.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        mScreenHeight = size.y;
-        mScreenWidth = size.x;
 
 
         mProgressArcPaint = new Paint();
@@ -313,6 +332,7 @@ public class Fab extends View {
         mProgressArcPaint.setStyle(Paint.Style.STROKE);
         mProgressArcPaint.setColor(mProgressColor);
 
+        invalidate();
     }
 
     @Override
@@ -324,12 +344,16 @@ public class Fab extends View {
             //invisible shadow layer
             mButtonPaint.clearShadowLayer();
             if (mBackgroundCanvasSize == BACKGROUND_CANVAS_SCALE) {
-                mProgressStartValue += 3;
+                if (mFinishFlg == FINISH_OFF && mReverse && mProgressSweepValue >= 0) {
+                    mProgressStartValue += 1;
+                }else {
+                    mProgressStartValue += 3;
+                }
 
-                if (mProgressStartValue >= 360) {
+                if (mFinishFlg == FINISH_OFF && mProgressStartValue >= 360) {
                     mProgressStartValue -= 360;
                 }
-                if (mProgressSweepValue >= 360) {
+                if (mFinishFlg == FINISH_OFF && mProgressSweepValue >= 360) {
                     mProgressSweepValue -= 360;
                 }
                 if (mProgressAccelerate <= PROGRESS_ACCELERATE_MIN) {
@@ -341,20 +365,24 @@ public class Fab extends View {
 
                 mProgressAccelerate -= PROGRESS_ACCELERATE_ADDITION;
 
-                mProgressSweepValue += 5 * mProgressAccelerate;
+                if(mFinishFlg == FINISH_ON && !mReverse){
+                    mProgressSweepValue += 3 * mProgressAccelerate;
+                }else {
+                    mProgressSweepValue += 5 * mProgressAccelerate;
+                }
 
-                if (mReverse && mProgressSweepValue >= 0) {
+                if (mFinishFlg == FINISH_OFF && mReverse && mProgressSweepValue >= 0) {
                     mReverse = !mReverse;
                     mProgressSweepValue = 0;
                     mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
-                } else if (mProgressSweepValue > PROGRESS_MAX_VALUE) {
+                } else if (mFinishFlg == FINISH_OFF && mProgressSweepValue > PROGRESS_MAX_VALUE) {
                     mReverse = !mReverse;
                     mProgressStartValue += mProgressSweepValue;
                     mProgressSweepValue = -PROGRESS_MAX_VALUE;
                     mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
+                } else if(mProgressSweepValue > 500){
+                    isProgress = false;
                 }
-
-
             }
 
 
@@ -373,6 +401,38 @@ public class Fab extends View {
             if (mBackgroundCanvasSize > FAB_CANVAS_SCALE) {
                 mBackgroundCanvasSize = FAB_CANVAS_SCALE;
                 mButtonPaint.setShadowLayer(dpToPx(mShadowRadius), 0.0f, mDepth, mShadowColor);
+                if(mFinishFlg == FINISH_ON && mFinishAnimator == null){
+                    mFinishAnimator = ObjectAnimator.ofInt(this, "finishAnimationColor", mFabColor, mProgressColor);
+                    mFinishAnimator.setDuration(400);
+                    mFinishAnimator.setEvaluator(new ArgbEvaluator());
+                    mFinishAnimator.start();
+                    mFinishAnimator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mFinishFlg = FINISH_ENDED;
+                            mFinishAnimator = null;
+                            if(mListener != null){
+                                mListener.finish();
+                            }
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+
+                }
             } else {
                 mBackgroundCanvasSize += 0.05f;
                 isInvalidate = true;
@@ -380,7 +440,12 @@ public class Fab extends View {
             }
         }
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / FAB_CANVAS_SCALE), mButtonPaint);
-        canvas.drawBitmap(mBitmap, (getWidth() - mBitmap.getWidth()) / 2, (getHeight() - mBitmap.getHeight()) / 2, mDrawablePaint);
+
+        if(mFinishFlg == FINISH_ENDED){
+            canvas.drawBitmap(mFinishIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
+        }else{
+            canvas.drawBitmap(mIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
+        }
         if (isInvalidate)
             invalidate();
     }
@@ -435,6 +500,7 @@ public class Fab extends View {
         private float mBackgroundCanvasSize;
         private float mProgressAccelerate;
         private int mProgressSweepValue;
+        private int mFinishFlg;
 
         public SavedState(Parcel in) {
             /*
@@ -451,6 +517,7 @@ public class Fab extends View {
             mBackgroundCanvasSize = in.readFloat();
             mProgressAccelerate = in.readFloat();
             mProgressSweepValue = in.readInt();
+            mFinishFlg = in.readInt();
         }
 
         public SavedState(Parcelable superState) {
@@ -470,6 +537,7 @@ public class Fab extends View {
             out.writeFloat(mBackgroundCanvasSize);
             out.writeFloat(mProgressAccelerate);
             out.writeInt(mProgressSweepValue);
+            out.writeFloat(mFinishFlg);
         }
 
         public static final Creator CREATOR =

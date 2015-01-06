@@ -5,8 +5,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.miruker.fabprogress.Fab;
+import com.miruker.fabprogress.FabListener;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -19,10 +21,27 @@ public class MainActivity extends ActionBarActivity {
         findViewById(R.id.btnShowProgress).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((Fab)findViewById(R.id.fabAction)).showProgress(!((Fab)findViewById(R.id.fabAction)).isProgress());
+                if (!((Fab) findViewById(R.id.fabAction)).isProgress())
+                    ((Fab) findViewById(R.id.fabAction)).showProgress();
+                else
+                    ((Fab) findViewById(R.id.fabAction)).hideProgress();
             }
         });
 
+        findViewById(R.id.btnFinish).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (((Fab) findViewById(R.id.fabAction)).isProgress())
+                    ((Fab) findViewById(R.id.fabAction)).finishProgress();
+            }
+        });
+
+        ((Fab) findViewById(R.id.fabAction)).addListener(new FabListener() {
+            @Override
+            public void finish() {
+                Toast.makeText(getApplicationContext(),"finished!",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

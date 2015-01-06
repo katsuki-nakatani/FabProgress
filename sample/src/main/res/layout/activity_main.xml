@@ -18,6 +18,7 @@
         app:progressColor="#009688"
         app:progressBackgroundColor="@android:color/white"
         app:fabDrawable="@drawable/ic_arrow_back"
+        app:fabFinishDrawable="@drawable/ic_check"
         app:fabShadowRadius="4"
         />
 
@@ -27,8 +28,16 @@
         android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
+        android:layout_gravity="left|bottom"
         android:text="Change Progress"
         android:id="@+id/btnShowProgress"/>
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:text="End Progress"
+        android:id="@+id/btnFinish"/>
 
 </FrameLayout>

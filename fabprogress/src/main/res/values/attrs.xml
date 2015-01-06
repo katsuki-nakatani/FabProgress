@@ -1,6 +1,7 @@
 <resources>
     <declare-styleable name="Fab">
         <attr name="fabDrawable" format="reference" />
+        <attr name="fabFinishDrawable" format="reference" />
         <attr name="fabColor" format="color" />
         <attr name="progressColor" format="color" />
         <attr name="progressBackgroundColor" format="color" />
