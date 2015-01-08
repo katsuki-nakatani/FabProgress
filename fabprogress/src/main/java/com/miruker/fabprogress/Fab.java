@@ -1,6 +1,7 @@
 package com.miruker.fabprogress;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -23,6 +24,7 @@ import android.view.View;
 
 public class Fab extends View {
 
+    private static final int PROGRESS_END_DURATION = 100;
     private static final int PROGRESS_DEFAULT_COLOR = Color.parseColor("#009688");
     private static final float SHADOW_RADIUS = 10f;
     private static final int STROKE_SIZE = 12;
@@ -43,6 +45,7 @@ public class Fab extends View {
     private static final int FINISH_OFF = 0;
     private static final int FINISH_ON = 1;
     private static final int FINISH_ENDED = 2;
+    private static final int FINISH_DELAY = 1000;
 
     Context _context;
     Paint mButtonPaint;
@@ -69,8 +72,9 @@ public class Fab extends View {
     private float mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
     private int mProgressSweepValue = 0;
     private int mFinishFlg = FINISH_OFF;
-    private ValueAnimator mFinishAnimator;
+    private AnimatorSet mFinishAnimator;
     private FabListener mListener;
+    private int mFinishDelay = FINISH_DELAY;
 
 
     /**
@@ -104,6 +108,7 @@ public class Fab extends View {
         saved.mProgressAccelerate = mProgressAccelerate;
         saved.mProgressSweepValue = mProgressSweepValue;
         saved.mFinishFlg = mFinishFlg;
+        saved.mFinishDelay = mFinishDelay;
         return saved;
     }
 
@@ -128,6 +133,7 @@ public class Fab extends View {
         mProgressAccelerate = saved.mProgressAccelerate;
         mReverse = saved.mReverse;
         isProgress = saved.isProgress;
+        mFinishDelay = saved.mFinishDelay;
         mProgressSweepValue = saved.mProgressSweepValue;
         mFinishFlg = saved.mFinishFlg;
         if(mFinishFlg == FINISH_ENDED && mButtonPaint != null){
@@ -176,6 +182,7 @@ public class Fab extends View {
         mBackgroundCanvasColor = a.getColor(R.styleable.Fab_progressBackgroundColor, Color.WHITE);
         mDistance = a.getInt(R.styleable.Fab_fabDepth, mDistance);
         mShadowRadius = a.getFloat(R.styleable.Fab_fabShadowRadius, SHADOW_RADIUS);
+        mFinishDelay = a.getInt(R.styleable.Fab_fabFinishDelay, FINISH_DELAY);
         switch (mDistance) {
             case 0:
                 mDepth = DEPTH_1;
@@ -228,6 +235,18 @@ public class Fab extends View {
     public void finishProgress(){
     //    isProgress = false;
         mFinishFlg = FINISH_ON;
+        invalidate();
+    }
+
+    public void setFinishAnimationDelay(int delay){
+        mFinishDelay = delay;
+        invalidate();
+    }
+
+    public void clearProgress(){
+        isProgress = false;
+        mFinishFlg = FINISH_OFF;
+        mButtonPaint.setColor(mFabColor);
         invalidate();
     }
 
@@ -380,7 +399,7 @@ public class Fab extends View {
                     mProgressStartValue += mProgressSweepValue;
                     mProgressSweepValue = -PROGRESS_MAX_VALUE;
                     mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
-                } else if(mProgressSweepValue > 500){
+                } else if(mProgressSweepValue > 400){
                     isProgress = false;
                 }
             }
@@ -402,11 +421,10 @@ public class Fab extends View {
                 mBackgroundCanvasSize = FAB_CANVAS_SCALE;
                 mButtonPaint.setShadowLayer(dpToPx(mShadowRadius), 0.0f, mDepth, mShadowColor);
                 if(mFinishFlg == FINISH_ON && mFinishAnimator == null){
-                    mFinishAnimator = ObjectAnimator.ofInt(this, "finishAnimationColor", mFabColor, mProgressColor);
-                    mFinishAnimator.setDuration(400);
-                    mFinishAnimator.setEvaluator(new ArgbEvaluator());
-                    mFinishAnimator.start();
-                    mFinishAnimator.addListener(new Animator.AnimatorListener() {
+                    ValueAnimator finishAnimator = ObjectAnimator.ofInt(this, "finishAnimationColor", mFabColor, mProgressColor);
+                    finishAnimator.setDuration(PROGRESS_END_DURATION);
+                    finishAnimator.setEvaluator(new ArgbEvaluator());
+                    finishAnimator.addListener(new Animator.AnimatorListener() {
                         @Override
                         public void onAnimationStart(Animator animation) {
 
@@ -415,10 +433,6 @@ public class Fab extends View {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             mFinishFlg = FINISH_ENDED;
-                            mFinishAnimator = null;
-                            if(mListener != null){
-                                mListener.finishAnimation();
-                            }
                         }
 
                         @Override
@@ -431,7 +445,35 @@ public class Fab extends View {
 
                         }
                     });
+                    ValueAnimator delayAnimator = ObjectAnimator.ofInt(this, "scaleX", 1, 1);
+                    delayAnimator.setDuration(mFinishDelay);
 
+                    delayAnimator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mFinishAnimator = null;
+                            if(mListener != null && mFinishFlg == FINISH_ENDED)
+                                mListener.finishAnimation();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    mFinishAnimator = new AnimatorSet();
+                    mFinishAnimator.playSequentially(finishAnimator,delayAnimator);
+                    mFinishAnimator.start();
                 }
             } else {
                 mBackgroundCanvasSize += 0.05f;
@@ -439,6 +481,7 @@ public class Fab extends View {
                 canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / mBackgroundCanvasSize), mProgressBackPaint);
             }
         }
+
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / FAB_CANVAS_SCALE), mButtonPaint);
 
         if(mFinishFlg == FINISH_ENDED){
@@ -470,7 +513,7 @@ public class Fab extends View {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (isProgress) {
+        if (isProgress || mFinishFlg == FINISH_ON || mFinishFlg == FINISH_ENDED) {
             setAlpha(1.0f);
         } else {
             setAlpha(enabled ? 1.0f : FAB_DISABLED_ALPHA);
@@ -501,6 +544,7 @@ public class Fab extends View {
         private float mProgressAccelerate;
         private int mProgressSweepValue;
         private int mFinishFlg;
+        private int mFinishDelay;
 
         public SavedState(Parcel in) {
             /*
@@ -518,6 +562,7 @@ public class Fab extends View {
             mProgressAccelerate = in.readFloat();
             mProgressSweepValue = in.readInt();
             mFinishFlg = in.readInt();
+            mFinishDelay = in.readInt();
         }
 
         public SavedState(Parcelable superState) {
@@ -538,6 +583,7 @@ public class Fab extends View {
             out.writeFloat(mProgressAccelerate);
             out.writeInt(mProgressSweepValue);
             out.writeFloat(mFinishFlg);
+            out.writeInt(mFinishDelay);
         }
 
         public static final Creator CREATOR =

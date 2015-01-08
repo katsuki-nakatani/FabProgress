@@ -6,4 +6,5 @@ package com.miruker.fabprogress;
 public interface FabListener {
 
     public void finishAnimation();
+
 }
