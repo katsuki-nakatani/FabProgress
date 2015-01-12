@@ -5,6 +5,6 @@ package com.miruker.fabprogress;
  */
 public interface FabListener {
 
-    public void finishAnimation();
+    public void finishAnimation(Fab fab);
 
 }

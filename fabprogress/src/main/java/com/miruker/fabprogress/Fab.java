@@ -42,10 +42,32 @@ public class Fab extends View {
     private static final float DEPTH_3 = 10.0f;
     private static final float DEPTH_4 = 14.0f;
     private static final float DEPTH_5 = 19.0f;
-    private static final int FINISH_OFF = 0;
-    private static final int FINISH_ON = 1;
-    private static final int FINISH_ENDED = 2;
     private static final int FINISH_DELAY = 1000;
+
+    public enum SUCCESS_ANIMATION {
+        OFF(0),
+        ON(1),
+        END_ANIMATING(2),
+        ENDED(3);
+
+        private final int key;
+
+        private SUCCESS_ANIMATION(int key){
+            this.key = key;
+        }
+
+        public int getKey(){
+            return key;
+        }
+        public static SUCCESS_ANIMATION valueOf(int key) {
+            for (SUCCESS_ANIMATION num : values()) {
+                if (num.getKey() == key) {
+                    return num;
+                }
+            }
+            throw new IllegalArgumentException("no such enum object for the id: " + key);
+        }
+    }
 
     Context _context;
     Paint mButtonPaint;
@@ -71,7 +93,7 @@ public class Fab extends View {
     private float mBackgroundCanvasSize = FAB_CANVAS_SCALE;
     private float mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
     private int mProgressSweepValue = 0;
-    private int mFinishFlg = FINISH_OFF;
+    private SUCCESS_ANIMATION mSuccessAnimationState = SUCCESS_ANIMATION.OFF;
     private AnimatorSet mFinishAnimator;
     private FabListener mListener;
     private int mFinishDelay = FINISH_DELAY;
@@ -107,7 +129,7 @@ public class Fab extends View {
         saved.isProgress = isProgress;
         saved.mProgressAccelerate = mProgressAccelerate;
         saved.mProgressSweepValue = mProgressSweepValue;
-        saved.mFinishFlg = mFinishFlg;
+        saved.mProgressState = mSuccessAnimationState.key;
         saved.mFinishDelay = mFinishDelay;
         return saved;
     }
@@ -135,8 +157,8 @@ public class Fab extends View {
         isProgress = saved.isProgress;
         mFinishDelay = saved.mFinishDelay;
         mProgressSweepValue = saved.mProgressSweepValue;
-        mFinishFlg = saved.mFinishFlg;
-        if(mFinishFlg == FINISH_ENDED && mButtonPaint != null){
+        mSuccessAnimationState = SUCCESS_ANIMATION.valueOf(saved.mProgressState);
+        if((mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key) && mButtonPaint != null){
             mButtonPaint.setColor(mProgressColor);
         }
     }
@@ -210,7 +232,7 @@ public class Fab extends View {
      */
     public void showProgress() {
         isProgress = true;
-        mFinishFlg = FINISH_OFF;
+        mSuccessAnimationState = SUCCESS_ANIMATION.OFF;
         mFinishAnimator = null;
         mButtonPaint.setColor(mFabColor);
         setAlpha(1.0f);
@@ -226,7 +248,7 @@ public class Fab extends View {
      * hide progress ring
      */
     public void hideProgress() {
-        if(isProgress == true && mFinishFlg == FINISH_OFF) {
+        if(isProgress == true && mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key) {
             isProgress = false;
             invalidate();
         }
@@ -234,7 +256,7 @@ public class Fab extends View {
 
     public void finishProgress(){
     //    isProgress = false;
-        mFinishFlg = FINISH_ON;
+        mSuccessAnimationState = SUCCESS_ANIMATION.ON;
         invalidate();
     }
 
@@ -245,9 +267,13 @@ public class Fab extends View {
 
     public void clearProgress(){
         isProgress = false;
-        mFinishFlg = FINISH_OFF;
+        mSuccessAnimationState = SUCCESS_ANIMATION.OFF;
         mButtonPaint.setColor(mFabColor);
         invalidate();
+    }
+
+    public SUCCESS_ANIMATION getSuccessAnimationState(){
+        return mSuccessAnimationState;
     }
 
     /**
@@ -363,16 +389,16 @@ public class Fab extends View {
             //invisible shadow layer
             mButtonPaint.clearShadowLayer();
             if (mBackgroundCanvasSize == BACKGROUND_CANVAS_SCALE) {
-                if (mFinishFlg == FINISH_OFF && mReverse && mProgressSweepValue >= 0) {
+                if (mSuccessAnimationState == SUCCESS_ANIMATION.OFF && mReverse && mProgressSweepValue >= 0) {
                     mProgressStartValue += 1;
                 }else {
                     mProgressStartValue += 3;
                 }
 
-                if (mFinishFlg == FINISH_OFF && mProgressStartValue >= 360) {
+                if (mSuccessAnimationState == SUCCESS_ANIMATION.OFF && mProgressStartValue >= 360) {
                     mProgressStartValue -= 360;
                 }
-                if (mFinishFlg == FINISH_OFF && mProgressSweepValue >= 360) {
+                if (mSuccessAnimationState == SUCCESS_ANIMATION.OFF && mProgressSweepValue >= 360) {
                     mProgressSweepValue -= 360;
                 }
                 if (mProgressAccelerate <= PROGRESS_ACCELERATE_MIN) {
@@ -384,17 +410,17 @@ public class Fab extends View {
 
                 mProgressAccelerate -= PROGRESS_ACCELERATE_ADDITION;
 
-                if(mFinishFlg == FINISH_ON && !mReverse){
+                if(mSuccessAnimationState == SUCCESS_ANIMATION.ON && !mReverse){
                     mProgressSweepValue += 3 * mProgressAccelerate;
                 }else {
                     mProgressSweepValue += 5 * mProgressAccelerate;
                 }
 
-                if (mFinishFlg == FINISH_OFF && mReverse && mProgressSweepValue >= 0) {
+                if (mSuccessAnimationState == SUCCESS_ANIMATION.OFF && mReverse && mProgressSweepValue >= 0) {
                     mReverse = !mReverse;
                     mProgressSweepValue = 0;
                     mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
-                } else if (mFinishFlg == FINISH_OFF && mProgressSweepValue > PROGRESS_MAX_VALUE) {
+                } else if (mSuccessAnimationState == SUCCESS_ANIMATION.OFF && mProgressSweepValue > PROGRESS_MAX_VALUE) {
                     mReverse = !mReverse;
                     mProgressStartValue += mProgressSweepValue;
                     mProgressSweepValue = -PROGRESS_MAX_VALUE;
@@ -420,7 +446,7 @@ public class Fab extends View {
             if (mBackgroundCanvasSize > FAB_CANVAS_SCALE) {
                 mBackgroundCanvasSize = FAB_CANVAS_SCALE;
                 mButtonPaint.setShadowLayer(dpToPx(mShadowRadius), 0.0f, mDepth, mShadowColor);
-                if(mFinishFlg == FINISH_ON && mFinishAnimator == null){
+                if(mSuccessAnimationState == SUCCESS_ANIMATION.ON && mFinishAnimator == null){
                     ValueAnimator finishAnimator = ObjectAnimator.ofInt(this, "finishAnimationColor", mFabColor, mProgressColor);
                     finishAnimator.setDuration(PROGRESS_END_DURATION);
                     finishAnimator.setEvaluator(new ArgbEvaluator());
@@ -432,7 +458,7 @@ public class Fab extends View {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            mFinishFlg = FINISH_ENDED;
+                            mSuccessAnimationState = SUCCESS_ANIMATION.END_ANIMATING;
                         }
 
                         @Override
@@ -457,8 +483,11 @@ public class Fab extends View {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             mFinishAnimator = null;
-                            if(mListener != null && mFinishFlg == FINISH_ENDED)
-                                mListener.finishAnimation();
+                            if(mListener != null && mSuccessAnimationState == SUCCESS_ANIMATION.END_ANIMATING) {
+                                mSuccessAnimationState = SUCCESS_ANIMATION.ENDED;
+                                mListener.finishAnimation(Fab.this);
+                            }
+                            mSuccessAnimationState = SUCCESS_ANIMATION.ENDED;
                         }
 
                         @Override
@@ -484,7 +513,7 @@ public class Fab extends View {
 
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / FAB_CANVAS_SCALE), mButtonPaint);
 
-        if(mFinishFlg == FINISH_ENDED){
+        if(mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key){
             canvas.drawBitmap(mFinishIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
         }else{
             canvas.drawBitmap(mIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
@@ -513,7 +542,7 @@ public class Fab extends View {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (isProgress || mFinishFlg == FINISH_ON || mFinishFlg == FINISH_ENDED) {
+        if (isProgress || mSuccessAnimationState.key >= SUCCESS_ANIMATION.ON.key) {
             setAlpha(1.0f);
         } else {
             setAlpha(enabled ? 1.0f : FAB_DISABLED_ALPHA);
@@ -543,7 +572,7 @@ public class Fab extends View {
         private float mBackgroundCanvasSize;
         private float mProgressAccelerate;
         private int mProgressSweepValue;
-        private int mFinishFlg;
+        private int mProgressState;
         private int mFinishDelay;
 
         public SavedState(Parcel in) {
@@ -561,7 +590,7 @@ public class Fab extends View {
             mBackgroundCanvasSize = in.readFloat();
             mProgressAccelerate = in.readFloat();
             mProgressSweepValue = in.readInt();
-            mFinishFlg = in.readInt();
+            mProgressState = in.readInt();
             mFinishDelay = in.readInt();
         }
 
@@ -582,7 +611,7 @@ public class Fab extends View {
             out.writeFloat(mBackgroundCanvasSize);
             out.writeFloat(mProgressAccelerate);
             out.writeInt(mProgressSweepValue);
-            out.writeFloat(mFinishFlg);
+            out.writeFloat(mProgressState);
             out.writeInt(mFinishDelay);
         }
 

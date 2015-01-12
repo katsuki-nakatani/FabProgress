@@ -2,39 +2,39 @@
 <items version="2" >
 
     <item
-        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
-        jumboMode="false"
-        revision="21.1.1"
-        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-3341f7b0936fc7c3df8ae8ae6aeda2e388074d30.jar" />
-    </item>
-    <item
         jar="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.3/support-annotations-21.0.3.jar"
         jumboMode="false"
         revision="21.1.1"
         sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-fa100554894d48afbb0ad0851f92cc333d0a6051.jar" />
+        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-fa100554894d48afbb0ad0851f92cc333d0a6051.jar" />
     </item>
     <item
-        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/classes.jar"
-        jumboMode="false"
-        revision="21.1.1"
-        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-2f810183cf322bd1b5122eab803d2f51abdd0e69.jar" />
-    </item>
-    <item
-        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/libs/internal_impl-21.0.3.jar"
+        jar="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/libs/internal_impl-21.0.3.jar"
         jumboMode="false"
         revision="21.1.1"
         sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-f43e1cd34d256ad2333c8e12dc4422b53abac3c7.jar" />
+        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-297317496a58ee0bf9f49c1b303f70e829c79b59.jar" />
     </item>
     <item
-        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/FabProgress/fabprogress/unspecified/classes.jar"
+        jar="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/classes.jar"
         jumboMode="false"
         revision="21.1.1"
-        sha1="4827456624318dc87bb5416a76e4c42a63ecf231">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-5153216ec192eb0e8b9f39f08f33967109310e52.jar" />
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-563a10f54abc571a30907d4c8c328a71ef58bb0f.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-79cd3707a728daf6b43a51cec080636887313822.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/exploded-aar/FabProgress/fabprogress/unspecified/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="955523bd3a835c1d3868472f3ae5f111a0b5432d">
+        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-6ead76293e644a22258f5826230a366d7502ce82.jar" />
     </item>
 
 </items>
