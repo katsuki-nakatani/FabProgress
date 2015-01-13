@@ -534,7 +534,7 @@ public class Fab extends View {
             }
         }
 
-        if (!isEnabled() && !isProgress)
+        if (!isEnabled() && !isProgress && mSuccessAnimationState.key == SUCCESS_ANIMATION.OFF.key)
             setAlpha(FAB_DISABLED_ALPHA);
         return super.onTouchEvent(event);
     }
