@@ -248,10 +248,8 @@ public class Fab extends View {
      * hide progress ring
      */
     public void hideProgress() {
-        if(isProgress == true && mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key) {
-            isProgress = false;
-            invalidate();
-        }
+        isProgress = false;
+        invalidate();
     }
 
     public void finishProgress(){
