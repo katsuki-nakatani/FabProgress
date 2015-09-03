@@ -2,18 +2,39 @@
 <items version="2" >
 
     <item
-        jar="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.3/support-annotations-21.0.3.jar"
+        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/jars/libs/internal_impl-23.0.0.jar"
         jumboMode="false"
-        revision="21.1.1"
-        sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
-        <dex dex="/Users/katsuki-nakatani/git/GitHub/FabProgress/sample/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-fa100554894d48afbb0ad0851f92cc333d0a6051.jar" />
+        revision="23.0.0"
+        sha1="8bd336eeae661e8311330284897ee07f8ebaa297">
+        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/internal_impl-23.0.0-d7b4e83875d961290a27e2bc7f6bfcda75370e9d.jar" />
     </item>
     <item
-        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/FabProgress/fabprogress/unspecified/classes.jar"
+        jar="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/23.0.0/support-annotations-23.0.0.jar"
         jumboMode="false"
-        revision="21.1.1"
-        sha1="17762ec30c4e75325047fa374ae379d88be93eb1">
-        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-5153216ec192eb0e8b9f39f08f33967109310e52.jar" />
+        revision="23.0.0"
+        sha1="990e7f98a7bad86a40b1f0bcfeb039023afd0839">
+        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/support-annotations-23.0.0-d97d958f7b9e66eb37023ba9809e07b368e577ed.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.0"
+        sha1="4fcf0b1879f8caf497c073e1432d398e9e2988c1">
+        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-ebbd16cb03b9b2958694fb898a557a97f21cfe33.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/FabProgress/fabprogress/unspecified/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.0"
+        sha1="670aae8fda73342709ca95171cddda50c6a7a751">
+        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-19c9225a77bcd4e769d2328460204a57a640a012.jar" />
+    </item>
+    <item
+        jar="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.0"
+        sha1="8413c27b45b7fe61dca4a98159f65e2cee215f5a">
+        <dex dex="/Users/katsuki-nakatani/git/github/FabProgress/sample/build/intermediates/pre-dexed/debug/classes-3e91abfe68c43f84239c8c76de5ada2ab69e7973.jar" />
     </item>
 
 </items>

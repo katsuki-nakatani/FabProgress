@@ -21,7 +21,6 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 
-
 public class Fab extends View {
 
     private static final int PROGRESS_END_DURATION = 100;
@@ -44,30 +43,11 @@ public class Fab extends View {
     private static final float DEPTH_5 = 19.0f;
     private static final int FINISH_DELAY = 1000;
 
-    public enum SUCCESS_ANIMATION {
-        OFF(0),
-        ON(1),
-        END_ANIMATING(2),
-        ENDED(3);
-
-        private final int key;
-
-        private SUCCESS_ANIMATION(int key) {
-            this.key = key;
-        }
-
-        public int getKey() {
-            return key;
-        }
-
-        public static SUCCESS_ANIMATION valueOf(int key) {
-            for (SUCCESS_ANIMATION num : values()) {
-                if (num.getKey() == key) {
-                    return num;
-                }
-            }
-            throw new IllegalArgumentException("no such enum object for the id: " + key);
-        }
+    interface SUCCESS_ANIMATION{
+        int OFF = 0;
+        int ON = 1;
+        int END_ANIMATING = 2;
+        int ENDED = 3;
     }
 
     Context _context;
@@ -94,7 +74,7 @@ public class Fab extends View {
     private float mBackgroundCanvasSize = FAB_CANVAS_SCALE;
     private float mProgressAccelerate = PROGRESS_ACCELERATE_MAX;
     private int mProgressSweepValue = 0;
-    private SUCCESS_ANIMATION mSuccessAnimationState = SUCCESS_ANIMATION.OFF;
+    private int  mSuccessAnimationState = SUCCESS_ANIMATION.OFF;
     private AnimatorSet mFinishAnimator;
     private FabListener mListener;
     private int mFinishDelay = FINISH_DELAY;
@@ -128,7 +108,7 @@ public class Fab extends View {
         saved.isProgress = isProgress;
         saved.mProgressAccelerate = mProgressAccelerate;
         saved.mProgressSweepValue = mProgressSweepValue;
-        saved.mProgressState = mSuccessAnimationState.key;
+        saved.mProgressState = mSuccessAnimationState;
         saved.mFinishDelay = mFinishDelay;
         return saved;
     }
@@ -156,8 +136,8 @@ public class Fab extends View {
         isProgress = saved.isProgress;
         mFinishDelay = saved.mFinishDelay;
         mProgressSweepValue = saved.mProgressSweepValue;
-        mSuccessAnimationState = SUCCESS_ANIMATION.valueOf(saved.mProgressState);
-        if ((mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key) && mButtonPaint != null) {
+        mSuccessAnimationState = saved.mProgressState;
+        if ((mSuccessAnimationState >= SUCCESS_ANIMATION.END_ANIMATING) && mButtonPaint != null) {
             mButtonPaint.setColor(mProgressColor);
         }
     }
@@ -266,7 +246,7 @@ public class Fab extends View {
         invalidate();
     }
 
-    public SUCCESS_ANIMATION getSuccessAnimationState() {
+    public int getSuccessAnimationState() {
         return mSuccessAnimationState;
     }
 
@@ -508,7 +488,7 @@ public class Fab extends View {
 
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / FAB_CANVAS_SCALE), mButtonPaint);
 
-        if (mSuccessAnimationState.key >= SUCCESS_ANIMATION.END_ANIMATING.key) {
+        if (mSuccessAnimationState >= SUCCESS_ANIMATION.END_ANIMATING) {
             canvas.drawBitmap(mFinishIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
         } else {
             canvas.drawBitmap(mIconBitmap, (getWidth() - mIconBitmap.getWidth()) / 2, (getHeight() - mIconBitmap.getHeight()) / 2, mDrawablePaint);
@@ -529,7 +509,7 @@ public class Fab extends View {
             }
         }
 
-        if (!isEnabled() && !isProgress && mSuccessAnimationState.key == SUCCESS_ANIMATION.OFF.key)
+        if (!isEnabled() && !isProgress && mSuccessAnimationState == SUCCESS_ANIMATION.OFF)
             setAlpha(FAB_DISABLED_ALPHA);
         return super.onTouchEvent(event);
     }
@@ -537,7 +517,7 @@ public class Fab extends View {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (isProgress || mSuccessAnimationState.key >= SUCCESS_ANIMATION.ON.key) {
+        if (isProgress || mSuccessAnimationState >= SUCCESS_ANIMATION.ON) {
             setAlpha(1.0f);
         } else {
             setAlpha(enabled ? 1.0f : FAB_DISABLED_ALPHA);
@@ -571,9 +551,6 @@ public class Fab extends View {
         private int mFinishDelay;
 
         public SavedState(Parcel in) {
-            /*
-             * 必ず書いた順序で読み込むこと！
-             */
             super(in);
 
             isProgress = in.readInt() == 0 ? false : true;

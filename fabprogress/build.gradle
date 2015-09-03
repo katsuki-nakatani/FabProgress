@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         minSdkVersion 14
@@ -16,9 +16,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            if (output.outputFile != null && output.outputFile.name.endsWith('.aar')) {
+                // Rename APK
+                def applicationId = "fabprogress"
+//                    def versionCode = defaultConfig.versionCode
+                def versionName = defaultConfig.versionName
+                def date = new java.text.SimpleDateFormat("yyyyMMdd").format(new Date())
+                def newName = "${applicationId}_${variant.buildType.name}_${versionName}_${date}.aar"
+                output.outputFile = new File(output.outputFile.parent, newName)
+            }
+        }
+    }
+
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
 }
